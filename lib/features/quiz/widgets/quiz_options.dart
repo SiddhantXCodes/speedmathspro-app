@@ -1,4 +1,4 @@
-//lib/features/quiz/widgets/quiz_options.dart
+// lib/features/quiz/widgets/quiz_options.dart
 import 'package:flutter/material.dart';
 
 class QuizOptions extends StatelessWidget {
@@ -12,6 +12,15 @@ class QuizOptions extends StatelessWidget {
     required this.primary,
     required this.onSelect,
   });
+
+  // 🔧 FIX: remove trailing .0 for whole numbers
+  String _formatOption(String value) {
+    final n = num.tryParse(value);
+    if (n != null && n % 1 == 0) {
+      return n.toInt().toString();
+    }
+    return value;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +40,9 @@ class QuizOptions extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: () => onSelect(opt),
+              onPressed: () => onSelect(opt), // unchanged
               child: Text(
-                opt,
+                _formatOption(opt), // display-only fix
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

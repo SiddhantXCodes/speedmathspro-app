@@ -11,7 +11,7 @@ Future<void> showQuizEntryPopup({
   required String title,
   required List<String> infoLines,
   required VoidCallback onStart,
-  int questionCount = 10,
+
   int timeSeconds = 60,
   bool showPracticeLink = true, // ranked only
   bool showHistoryButton = false, // daily practice
@@ -110,7 +110,7 @@ Future<void> showQuizEntryPopup({
                         Icon(Icons.help_outline, size: 26, color: accent),
                         const SizedBox(height: 6),
                         Text(
-                          "$questionCount Questions",
+                          "∞ Question",
                           style: TextStyle(
                             fontSize: 13.5,
                             color: textColor,
@@ -126,7 +126,7 @@ Future<void> showQuizEntryPopup({
                         Text(
                           timeSeconds == 0
                               ? "No Time Limit"
-                              : "${(timeSeconds / 60).round()} Min",
+                              : "120 Sec",
                           style: TextStyle(
                             fontSize: 13.5,
                             color: textColor,

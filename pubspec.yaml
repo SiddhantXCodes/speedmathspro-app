@@ -3,7 +3,7 @@ description: "Boost your mental math speed with daily practice, streaks, and cha
 
 publish_to: 'none'
 
-version: 1.0.1+2
+version: 1.0.1+3
 
 environment:
   sdk: ^3.9.2
@@ -59,7 +59,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/elf_icon.png
+    - assets/images/speedmathspro-transparent.png
     - assets/images/speedmathspro-logo.png
 
 flutter_icons:

@@ -7,7 +7,7 @@ import '../../../theme/app_theme.dart';
 import '../../../services/hive_service.dart';
 import '../../../providers/performance_provider.dart';
 import '../../performance/screens/performance_screen.dart';
-
+import '../../quiz/screens/leaderboard_screen.dart';
 class QuickStatsSection extends StatefulWidget {
   final bool isDarkMode;
   const QuickStatsSection({super.key, required this.isDarkMode});
@@ -104,7 +104,7 @@ class _QuickStatsSectionState extends State<QuickStatsSection> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Quick Stats",
+                "Offline Pracice Stats",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -121,10 +121,7 @@ class _QuickStatsSectionState extends State<QuickStatsSection> {
                   );
                 },
                 icon: Icon(Icons.insights, color: accent),
-                label: Text(
-                  "Performance",
-                  style: TextStyle(color: accent),
-                ),
+                label: Text("Performance", style: TextStyle(color: accent)),
               ),
             ],
           ),
@@ -154,9 +151,35 @@ class _QuickStatsSectionState extends State<QuickStatsSection> {
                   ? "🎯 You’ve completed today’s Ranked Quiz"
                   : "⚡ Today’s Ranked Quiz is available",
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          // 🏆 Leaderboard button
+          SizedBox(
+            width: double.infinity,
+            height: 42,
+            child: OutlinedButton.icon(
+              onPressed:() {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              const LeaderboardScreen()), // or LeaderboardScreen
+                     
+                      );
+                    },
+               
+              icon: const Icon(Icons.emoji_events_outlined),
+              label: const Text("View Leaderboard"),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: accent,
+                side: BorderSide(color: accent.withOpacity(0.6)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),
@@ -168,12 +191,7 @@ class _QuickStatsSectionState extends State<QuickStatsSection> {
   // --------------------------------------------------------------------------
   // VALUE BOX
   // --------------------------------------------------------------------------
-  Widget _valueBox(
-    IconData icon,
-    String title,
-    int value,
-    Color accent,
-  ) {
+  Widget _valueBox(IconData icon, String title, int value, Color accent) {
     return Column(
       children: [
         Icon(icon, color: accent, size: 22),
@@ -188,10 +206,7 @@ class _QuickStatsSectionState extends State<QuickStatsSection> {
         ),
         Text(
           title,
-          style: TextStyle(
-            fontSize: 12,
-            color: accent.withOpacity(0.7),
-          ),
+          style: TextStyle(fontSize: 12, color: accent.withOpacity(0.7)),
         ),
       ],
     );

@@ -19,7 +19,7 @@ class PracticeQuizEntry extends StatelessWidget {
             max: 50,
             count: 10,
             mode: QuizMode.practice,
-            timeLimitSeconds: 20,
+            timeLimitSeconds: 120,
           ),
         ),
       );

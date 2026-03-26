@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:241690806355:android:679011bd7aada1f58d5ea6",
         "android_client_info": {
-          "package_name": "com.example.speedmath_arena"
+          "package_name": "com.vexonlabs.speedmathspro"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "241690806355-6b3elphnm3vpr8dbvmeslfff32rsnfd9.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.speedmath_arena",
+            "package_name": "com.vexonlabs.speedmathspro",
             "certificate_hash": "ad57f067ca773076606911bff8481c2cd69c3bb2"
           }
         },

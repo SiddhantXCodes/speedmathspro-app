@@ -6,9 +6,8 @@ import 'package:provider/provider.dart';
 
 import '../../../services/sync_manager.dart';
 
-
 import 'practice_overview_screen.dart';
-import '../usecase/generate_questions.dart';
+
 import '../../../theme/app_theme.dart';
 
 // NEW: import expanded PracticeMode enum
@@ -21,7 +20,8 @@ import '../../../models/daily_score.dart';
 // Repository
 import '../quiz_repository.dart';
 
-
+import '../usecase/generate_questions.dart';
+import '../usecase/question.dart';
 
 // Widgets
 import '../widgets/quiz_keyboard.dart';
@@ -43,8 +43,8 @@ class QuizScreen extends StatefulWidget {
   final int count;
   final QuizMode mode;
   final int timeLimitSeconds;
-final String? rankedUsername;
-final String? rankedDeviceId;
+  final String? rankedUsername;
+  final String? rankedDeviceId;
 
   /// When mixed practice, selected topics
   final List<String>? topics;
@@ -58,12 +58,12 @@ final String? rankedDeviceId;
     required this.max,
     required this.count,
     this.mode = QuizMode.practice,
-    this.timeLimitSeconds = 150,
+    this.timeLimitSeconds = 120,
     this.topics,
     this.onFinish,
-      // ADD THESE
-  this.rankedUsername,
-  this.rankedDeviceId,
+    // ADD THESE
+    this.rankedUsername,
+    this.rankedDeviceId,
   });
 
   @override
@@ -74,7 +74,8 @@ class _QuizScreenState extends State<QuizScreen> {
   static const _kAutoSubmitKey = 'auto_submit';
   static const _kLayoutKey = 'keyboard_layout';
   static const _kInputModeKey = 'input_mode';
-bool _isFinishing = false;
+  bool _isFinishing = false;
+  late final GenerateQuestionsUseCase _questionUsecase;
 
   late Question currentQuestion;
   late List<String> currentOptions;
@@ -98,13 +99,22 @@ bool _isFinishing = false;
   late Color textColor;
   late Color onPrimary;
 
-  @override
-  void initState() {
-    super.initState();
-    _startTimerCorrectly();
-    _loadPrefs();
-    _startNewQuiz();
+@override
+void initState() {
+  super.initState();
+  _questionUsecase = GenerateQuestionsUseCase();
+
+  // ✅ START RANKED SESSION
+  if (widget.mode == QuizMode.dailyRanked ||
+      widget.mode == QuizMode.timedRanked) {
+    _questionUsecase.startRanked(DateTime.now());
   }
+
+  _startTimerCorrectly();
+  _loadPrefs();
+  _startNewQuiz();
+}
+
 
   @override
   void dispose() {
@@ -126,13 +136,13 @@ bool _isFinishing = false;
     countdown = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
 
-     if (remainingTime <= 1) {
-  timer.cancel();
-  if (!_isFinishing) {
-    _finishQuiz();
-  }
-  return;
-}
+      if (remainingTime <= 1) {
+        timer.cancel();
+        if (!_isFinishing) {
+          _finishQuiz();
+        }
+        return;
+      }
 
       setState(() => remainingTime--);
     });
@@ -192,24 +202,30 @@ bool _isFinishing = false;
     score = 0;
     currentOptions = _buildOptions(currentQuestion);
   }
+Question _generateQuestion() {
+  final isRanked = widget.mode == QuizMode.dailyRanked ||
+      widget.mode == QuizMode.timedRanked;
 
-  Question _generateQuestion() {
-    // Mixed practice with topic selection
-    if (widget.topics != null && widget.topics!.isNotEmpty) {
-      return QuestionGenerator.randomFromTopics(
-        widget.topics!,
-        widget.min,
-        widget.max,
-      );
-    }
+  final elapsed = widget.timeLimitSeconds <= 0
+      ? 0
+      : (widget.timeLimitSeconds - remainingTime);
 
-    // Topic-based or normal practice
-    return QuestionGenerator.random(
-      topic: widget.title,
-      min: widget.min,
-      max: widget.max,
-    );
-  }
+  return _questionUsecase.next(
+    mode: isRanked
+        ? QuestionFlowMode.ranked
+        : QuestionFlowMode.practice,
+
+    topics: widget.topics != null && widget.topics!.isNotEmpty
+        ? widget.topics!
+        : [widget.title],
+
+    min: widget.min,
+    max: widget.max,
+
+    // ✅ REQUIRED ONLY FOR RANKED
+    elapsedSeconds: elapsed,
+  );
+}
 
   // ----------------------------------------------------------------------
   // INPUT
@@ -277,61 +293,123 @@ bool _isFinishing = false;
   // ----------------------------------------------------------------------
   // FINISH QUIZ — FULLY UPDATED
   // ----------------------------------------------------------------------
-Future<void> _finishQuiz() async {
-  if (_isFinishing) return;
-  _isFinishing = true;
+  Future<void> _finishQuiz() async {
+    if (_isFinishing) return;
+    _isFinishing = true;
 
-  countdown?.cancel();
+_questionUsecase.endRanked(); // ✅ CLEANUP
+    countdown?.cancel();
 
-  final timeSpent = widget.timeLimitSeconds <= 0
-      ? 0
-      : (widget.timeLimitSeconds - remainingTime);
+    final timeSpent = widget.timeLimitSeconds <= 0
+        ? 0
+        : (widget.timeLimitSeconds - remainingTime);
 
-  final repo = QuizRepository();
+    final repo = QuizRepository();
 
-  // ======================================================
-  // 1️⃣ DAILY / TIMED RANKED
-  // ======================================================
-  if (widget.mode == QuizMode.dailyRanked ||
-      widget.mode == QuizMode.timedRanked) {
+    // ======================================================
+    // 1️⃣ DAILY / TIMED RANKED
+    // ======================================================
+    if (widget.mode == QuizMode.dailyRanked ||
+        widget.mode == QuizMode.timedRanked) {
+      if (widget.rankedUsername == null || widget.rankedDeviceId == null) {
+        debugPrint("❌ Ranked identity missing");
+        return;
+      }
 
-    if (widget.rankedUsername == null ||
-        widget.rankedDeviceId == null) {
-      debugPrint("❌ Ranked identity missing");
+      // ✅ ONE SOURCE OF TRUTH (Hive)
+      await repo.saveRankedScore(
+        username: widget.rankedUsername!,
+        deviceId: widget.rankedDeviceId!,
+        score: score,
+        timeTakenSeconds: timeSpent,
+      );
+
+      // 🔄 Fire-and-forget sync
+      SyncManager().syncPendingSessions();
+
+      if (!mounted) return;
+
+      await Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ResultScreen(
+            score: score,
+            timeTakenSeconds: timeSpent,
+            title: "Daily Ranked Result",
+          ),
+        ),
+      );
+
       return;
     }
 
-    // ✅ ONE SOURCE OF TRUTH (Hive)
-    await repo.saveRankedScore(
-      username: widget.rankedUsername!,
-      deviceId: widget.rankedDeviceId!,
-      score: score,
-      timeTakenSeconds: timeSpent,
-    );
+    // ======================================================
+    // 2️⃣ DAILY PRACTICE
+    // ======================================================
+    if (widget.title.toLowerCase() == "daily practice") {
+      await repo.savePracticeScore(score, timeSpent);
 
-    // 🔄 Fire-and-forget sync
-    SyncManager().syncPendingSessions();
+      if (!mounted) return;
 
-    if (!mounted) return;
+      await Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              const PracticeOverviewScreen(mode: PracticeMode.dailyPractice),
+        ),
+      );
+      return;
+    }
 
-    await Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ResultScreen(
+    // ======================================================
+    // 3️⃣ MIXED / CHALLENGE
+    // ======================================================
+    if (widget.title.toLowerCase() == "mixed practice" ||
+        widget.mode == QuizMode.challenge ||
+        widget.topics != null) {
+      await repo.saveMixedScore(score, timeSpent);
+
+      if (!mounted) return;
+
+      await Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              const PracticeOverviewScreen(mode: PracticeMode.mixedPractice),
+        ),
+      );
+      return;
+    }
+
+    // ======================================================
+    // 4️⃣ TOPIC PRACTICE
+    // ======================================================
+    final topicMode = PracticeModeX.fromTitle(widget.title);
+
+    if (topicMode != null) {
+      await HiveService.saveTopicScore(
+        topicMode,
+        DailyScore(
+          date: DateTime.now(),
           score: score,
           timeTakenSeconds: timeSpent,
-          title: "Daily Ranked Result",
         ),
-      ),
-    );
+      );
 
-    return;
-  }
+      if (!mounted) return;
 
-  // ======================================================
-  // 2️⃣ DAILY PRACTICE
-  // ======================================================
-  if (widget.title.toLowerCase() == "daily practice") {
+      await Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PracticeOverviewScreen(mode: topicMode),
+        ),
+      );
+      return;
+    }
+
+    // ======================================================
+    // 5️⃣ FALLBACK
+    // ======================================================
     await repo.savePracticeScore(score, timeSpent);
 
     if (!mounted) return;
@@ -343,70 +421,7 @@ Future<void> _finishQuiz() async {
             const PracticeOverviewScreen(mode: PracticeMode.dailyPractice),
       ),
     );
-    return;
   }
-
-  // ======================================================
-  // 3️⃣ MIXED / CHALLENGE
-  // ======================================================
-  if (widget.title.toLowerCase() == "mixed practice" ||
-      widget.mode == QuizMode.challenge ||
-      widget.topics != null) {
-    await repo.saveMixedScore(score, timeSpent);
-
-    if (!mounted) return;
-
-    await Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-            const PracticeOverviewScreen(mode: PracticeMode.mixedPractice),
-      ),
-    );
-    return;
-  }
-
-  // ======================================================
-  // 4️⃣ TOPIC PRACTICE
-  // ======================================================
-  final topicMode = PracticeModeX.fromTitle(widget.title);
-
-  if (topicMode != null) {
-    await HiveService.saveTopicScore(
-      topicMode,
-      DailyScore(
-        date: DateTime.now(),
-        score: score,
-        timeTakenSeconds: timeSpent,
-      ),
-    );
-
-    if (!mounted) return;
-
-    await Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => PracticeOverviewScreen(mode: topicMode),
-      ),
-    );
-    return;
-  }
-
-  // ======================================================
-  // 5️⃣ FALLBACK
-  // ======================================================
-  await repo.savePracticeScore(score, timeSpent);
-
-  if (!mounted) return;
-
-  await Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(
-      builder: (_) =>
-          const PracticeOverviewScreen(mode: PracticeMode.dailyPractice),
-    ),
-  );
-}
 
   // ----------------------------------------------------------------------
   // EXIT HANDLER

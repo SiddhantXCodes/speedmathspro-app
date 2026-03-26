@@ -34,9 +34,9 @@ class TopBar extends StatelessWidget {
           onPressed: () => Scaffold.of(scaffoldContext).openDrawer(),
         ),
       ),
-
+ 
       title: Text(
-        'SpeedMath Pro',
+        'SpeedMaths Pro',
         style: TextStyle(
           fontWeight: FontWeight.bold,
           color: textColor,

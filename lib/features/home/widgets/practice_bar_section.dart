@@ -76,7 +76,7 @@ class _PracticeBarSectionState extends State<PracticeBarSection> {
             title: "Daily Ranked Quiz",
             subtitle: attemptedToday
                 ? "You’ve already played today"
-                : "1 attempt • 150 seconds timer",
+                : "1 attempt • 120 seconds timer",
             icon: Icons.flash_on_rounded,
             color: accent,
             badge: cooldownText,
@@ -96,8 +96,7 @@ class _PracticeBarSectionState extends State<PracticeBarSection> {
                 context: context,
                 title: "Daily Ranked Quiz",
                 infoLines: const [
-                  "150 seconds timer",
-                  "Score = total correct answers",
+                  "Score = Total correct answers",
                   "1 attempt per day",
                 ],
                 onStart: () {
@@ -125,7 +124,7 @@ class _PracticeBarSectionState extends State<PracticeBarSection> {
                 context: context,
                 title: "Daily Practice Quiz",
                 infoLines: const [
-                  "150 seconds timer",
+                  "120 seconds timer",
                   "Unlimited attempts per day",
                 ],
                 onStart: () {

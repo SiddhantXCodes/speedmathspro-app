@@ -254,7 +254,7 @@ class PracticeOverviewScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         isDaily
-                            ? "10 questions • No time limit.\nBuild your speed daily!"
+                            ? "∞ questions • No time limit.\nBuild your speed daily!"
                             : isMixed
                             ? "Select topics & ranges to create your custom practice quiz."
                             : "Choose range & time — questions will be generated continuously based on your inputs.",

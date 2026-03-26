@@ -1,46 +1,35 @@
 // lib/main.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-
 import 'services/app_initializer.dart';
 import 'services/sync_manager.dart';
-
 // Providers
 import 'providers/theme_provider.dart';
 import 'providers/practice_log_provider.dart';
 import 'providers/performance_provider.dart';
 import 'providers/local_user_provider.dart';
-
 // App theme
 import 'theme/app_theme.dart';
-
 // Root gate
 import 'root_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   // 🔥 App-wide initialization (Hive, Firebase, boxes)
   await AppInitializer.ensureInitialized((_) {});
-
+  
   // 🔥 Create providers
   final themeProvider = ThemeProvider();
   final practiceProvider = PracticeLogProvider();
   final performanceProvider = PerformanceProvider();
   final localUserProvider = LocalUserProvider();
-
+  
   // 🔥 Explicit provider initialization
-  await Future.wait([
-    practiceProvider.init(),
-    performanceProvider.init(),
-    localUserProvider.init(),
-  ]);
-
+  await Future.wait([practiceProvider.init(), performanceProvider.init(), localUserProvider.init(),]);
+  
   // 🔥 Sync offline data (non-blocking)
   SyncManager().syncPendingSessions();
-
   runApp(
     MultiProvider(
       providers: [
@@ -54,9 +43,7 @@ void main() async {
   );
 }
 
-///
-/// Root MaterialApp wrapper (SINGLE SOURCE OF TRUTH)
-///
+// Root MaterialApp wrapper (SINGLE SOURCE OF TRUTH)
 class SpeedMathRootApp extends StatelessWidget {
   const SpeedMathRootApp({super.key});
 
@@ -70,7 +57,7 @@ class SpeedMathRootApp extends StatelessWidget {
 
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'SpeedMath Pro',
+          title: 'SpeedMaths Pro',
 
           // 🌙 THEME HANDLING (CORRECT PLACE)
           themeMode: themeProvider.themeMode,

@@ -18,11 +18,12 @@ class _UsernameScreenState extends State<UsernameScreen> {
     final user = context.read<LocalUserProvider>();
 
     try {
-      await user.setUsername(_nameController.text);
-      // ❌ NO NAVIGATION
-      // RootGate will automatically rebuild → Home
-    } catch (e) {
-      setState(() => _error = "Enter at least 3 characters");
+      await user.setUsername(_nameController.text.trim());
+      // RootGate handles navigation
+    } catch (_) {
+      setState(() {
+        _error = "Username must be at least 3 characters";
+      });
     }
   }
 
@@ -38,40 +39,106 @@ class _UsernameScreenState extends State<UsernameScreen> {
 
     return Scaffold(
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                "Welcome to SpeedMaths Pro",
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
+              // LOGO
+              Image.asset(
+                "assets/images/speedmathspro-transparent.png",
+                height: 90,
+                fit: BoxFit.contain,
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
-              TextField(
-                controller: _nameController,
-                textAlign: TextAlign.center,
-                maxLength: 15,
-                decoration: InputDecoration(
-                  hintText: "Enter your username",
-                  errorText: _error,
-                  counterText: "",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+              // CARD
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 22,
+                  vertical: 28,
                 ),
-              ),
+                decoration: BoxDecoration(
+                  color: theme.cardColor,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      "Welcome to SpeedMaths Pro",
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
 
-              const SizedBox(height: 16),
+                    const SizedBox(height: 10),
 
-              ElevatedButton(
-                onPressed: _submit,
-                child: const Text("Continue"),
+                    Text(
+                      "Pick a username to get started.\nNo login. No account. No internet required.",
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: const Color.fromARGB(255, 81, 81, 81),
+                        height: 1.4,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+
+                    const SizedBox(height: 26),
+
+                    // INPUT
+                    TextField(
+                      controller: _nameController,
+                      textAlign: TextAlign.center,
+                      maxLength: 15,
+                      decoration: InputDecoration(
+                        hintText:
+                            "Create username (e.g. sinchan123)",
+                        helperText:
+                            "By this name you will be identified in leaderboard",
+                        errorText: _error,
+                        counterText: "",
+                        filled: true,
+                        fillColor: Colors.grey.withOpacity(0.08),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 22),
+
+                    // BUTTON
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: _submit,
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: const Text(
+                          "Continue",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

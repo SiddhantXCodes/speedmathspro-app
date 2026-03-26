@@ -60,7 +60,7 @@ class _DailyRankedQuizEntryState extends State<DailyRankedQuizEntry> {
           max: 50,
           count: 10,
           mode: QuizMode.dailyRanked,
-          timeLimitSeconds: 150,
+          timeLimitSeconds: 120,
 
           // 👇 Identity (offline-safe)
           rankedUsername: user.username!,

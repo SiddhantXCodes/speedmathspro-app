@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -5,13 +8,23 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+/* =========================
+   LOAD KEYSTORE PROPERTIES
+========================= */
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
 android {
-    namespace = "com.example.speedmath_arena"
+    namespace = "com.vexonlabs.speedmathspro"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     defaultConfig {
-        applicationId = "com.example.speedmath_arena"
+        applicationId = "com.vexonlabs.speedmathspro"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
         versionCode = flutter.versionCode
@@ -19,12 +32,28 @@ android {
         multiDexEnabled = true
     }
 
+    /* =========================
+       SIGNING CONFIGS
+    ========================= */
+    signingConfigs {
+        create("release") {
+            storeFile = file(keystoreProperties["storeFile"] as String)
+            storePassword = keystoreProperties["storePassword"] as String
+            keyAlias = keystoreProperties["keyAlias"] as String
+            keyPassword = keystoreProperties["keyPassword"] as String
+        }
+    }
+
+    /* =========================
+       BUILD TYPES
+    ========================= */
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release") // ✅ CORRECT
             isMinifyEnabled = false
             isShrinkResources = false
         }
+
         debug {
             signingConfig = signingConfigs.getByName("debug")
         }
@@ -54,7 +83,6 @@ android {
         }
     }
 }
-
 
 flutter {
     source = "../.."
