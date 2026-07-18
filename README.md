@@ -1,7 +1,7 @@
 # 📱 SpeedMaths Pro
 
 ### Advanced Math Training App — Flutter, Firebase & Hive
-
+![](docs/image0.png)
 SpeedMaths Pro is an offline-first math practice app designed to improve calculation speed, accuracy, and consistency through daily quizzes, smart practice, analytics, and competitive rankings.
 
 > **Status:** Currently in the deployment stage and awaiting Google Play Store approval.
@@ -60,7 +60,7 @@ lib/
 
 | Home Screen | Ranked Quiz | Performance |
 | --- | --- | --- |
-| ![Home](screenshots/home.png) | ![Quiz](screenshots/quiz.png) | ![Performance](screenshots/performance.png) |
+| ![Home](docs/image1.png) | ![Quiz](docs/image4.png) | ![Performance](docs/image5.png) |
 
 > Replace these placeholders with final app screenshots after Play Store approval.
 
