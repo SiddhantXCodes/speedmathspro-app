@@ -1,118 +1,101 @@
-# 📱 SpeedMaths Pro  
-### Advanced Math Training App (Flutter + Firebase + Hive)
+# 📱 SpeedMaths Pro
 
-SpeedMaths Pro is a hybrid **online + offline math practice app** designed to improve calculation speed, accuracy and consistency.  
-It provides a competitive environment with daily ranked quizzes, practice modes, streaks, leaderboards, heatmaps, and detailed performance analytics.
+### Advanced Math Training App — Flutter, Firebase & Hive
 
----
+SpeedMaths Pro is an offline-first math practice app designed to improve calculation speed, accuracy, and consistency through daily quizzes, smart practice, analytics, and competitive rankings.
+
+> **Status:** Currently in the deployment stage and awaiting Google Play Store approval.
 
 ## 🚀 Features
 
-### 🎯 **Daily Ranked Quiz (Online)**
-- Same questions for all users daily  
-- Global leaderboard (Firebase)  
-- Ranked streak tracking  
-- Time-based scoring  
-- Cached to minimize Firebase reads  
+- **Daily Ranked Quiz:** Same daily questions for all users, time-based scoring, global leaderboard, and streak tracking.
+- **Smart Practice:** Unlimited offline topic-wise and mixed quizzes using Hive.
+- **Performance Analytics:** Activity heatmaps, accuracy trends, strengths, weaknesses, mistake tracking, and personal-best records.
+- **Learning Section:** Tables (1–30), tricks, shortcuts, and formulas available offline.
+- **Modern UI:** Responsive layouts, light/dark mode, Lottie animations, and smooth user experience.
 
-### 🧠 **Smart Practice (Offline: Hive)**
-- Topic-wise practice: addition, subtraction, division, tables, averages etc.  
-- Mixed quizzes  
-- Unlimited questions  
-- Instant accuracy & speed results  
-
-### 📊 **Performance Analytics**
-- Heatmap showing daily activity  
-- Weekly / Monthly stats  
-- Accuracy trends  
-- Strengths & weaknesses  
-- Mistake tracking engine  
-- Personal best record  
-
-### 📚 **Learning Section**
-- Tables viewer (1–30)  
-- Tricks, shortcuts, and formulas  
-- Static offline content  
-
-### 🧩 **Beautiful UI**
-- Fully responsive custom layout  
-- Light/Dark theme with adaptive text  
-- Lottie animations  
-- Smooth boot screen  
-- Modern card-based layout  
-
----
-
-## 🛠 **Tech Stack**
+## 🛠 Tech Stack
 
 | Layer | Technology |
-|-------|------------|
-| **Frontend** | Flutter (Dart) |
-| **Backend** | Firebase Auth, Firestore |
-| **Offline DB** | Hive NoSQL |
-| **State Management** | Provider |
-| **Architecture** | Repository Pattern + Sync Manager (Offline-first) |
-| **Caching** | Firebase cache layer |
-| **UI/UX** | Custom responsiveness, animations, theme engine |
+| --- | --- |
+| Frontend | Flutter (Dart) |
+| Backend | Firebase Authentication, Cloud Firestore |
+| Offline Database | Hive NoSQL |
+| State Management | Provider |
+| Architecture | Repository Pattern + Sync Manager |
+| UI/UX | Responsive design, animations, theme engine |
 
----
+## 🧩 Architecture
 
-## 📐 **Folder Structure (Simplified)**
+The app follows an offline-first approach:
 
+- Firebase and Hive access is handled through a repository layer.
+- The UI does not directly access Firestore or Hive.
+- `SyncManager` manages local-to-cloud synchronization, caching, conflict handling, and recovery after connectivity loss.
+- Daily ranked quizzes require an internet connection; practice, learning content, and much of the performance data remain available offline.
+
+## 📁 Project Structure
+
+```text
 lib/
 ├── features/
-│ ├── home/
-│ ├── auth/
-│ ├── quiz/
-│ ├── performance/
-│ └── learning/
+│   ├── home/
+│   ├── auth/
+│   ├── quiz/
+│   ├── performance/
+│   └── learning/
 ├── services/
-│ ├── app_initializer.dart
-│ ├── auth_service.dart
-│ ├── firebase_cache_service.dart
-│ ├── hive_service.dart
-│ └── sync_manager.dart
+│   ├── app_initializer.dart
+│   ├── auth_service.dart
+│   ├── firebase_cache_service.dart
+│   ├── hive_service.dart
+│   └── sync_manager.dart
 ├── providers/
 ├── models/
 ├── theme/
 └── widgets/
-
-
----
-
-## 🧩 **Core Architecture Explained**
-
-### 🔸 **Repository Pattern**
-All Firebase + Hive operations go through a clean repository layer.  
-UI never directly accesses Firestore or Hive.
-
-### 🔸 **SyncManager**
-Handles:
-- Local data → Cloud sync  
-- Cloud data → Local cache  
-- Conflict resolution  
-- Internet-loss recovery  
-
-### 🔸 **Hybrid Online+Offline**
-- Ranked quiz → Cloud  
-- Everything else → Completely offline  
-
-You can use this project as a real example of **production-ready offline-first architecture**.
-
----
+```
 
 ## 📸 Screenshots
-> *(Replace the placeholder images with actual screenshots once available.)*
 
 | Home Screen | Ranked Quiz | Performance |
-|------------|-------------|-------------|
+| --- | --- | --- |
 | ![Home](screenshots/home.png) | ![Quiz](screenshots/quiz.png) | ![Performance](screenshots/performance.png) |
 
----
+> Replace these placeholders with final app screenshots after Play Store approval.
 
-## 📥 Installation & Setup
+## 📥 Installation
 
-### 1️⃣ Clone the repository
-```sh
-git clone https://github.com/your-username/speedmathspro.git
+```bash
+git clone https://github.com/siddhantxcodes/speedmathspro.git
 cd speedmathspro
+flutter pub get
+flutter run
+```
+
+## 🔐 Firebase Setup
+
+Create and configure a Firebase project, then add the platform configuration files before running the app:
+
+- `android/app/google-services.json`
+- `ios/Runner/GoogleService-Info.plist`
+
+Do not commit Firebase credentials or sensitive configuration files to a public repository.
+
+## 📦 Build for Release
+
+```bash
+flutter build appbundle
+```
+
+The generated Android App Bundle will be available in:
+
+```text
+build/app/outputs/bundle/release/app-release.aab
+```
+
+## 📄 License
+
+© 2026 Siddhant Mishra. All rights reserved.
+
+This project is proprietary and shared for portfolio and demonstration purposes only. Copying, modifying, or redistributing any part of the source code or design without written permission is not allowed.
